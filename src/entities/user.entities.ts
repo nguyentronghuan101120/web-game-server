@@ -5,123 +5,125 @@ export class UserEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({
+    unique: true,
+  })
   username: string;
 
   @Column()
   password: string;
 
-  @Column()
-  name: string;
+  @Column({ nullable: true })
+  name: string | null;
 
-  @Column()
-  phone: string;
+  @Column({ nullable: true })
+  phone: string | null;
 
-  @Column()
-  email: string;
+  @Column({ nullable: true })
+  email: string | null;
 
-  @Column()
-  status: string;
+  @Column({ nullable: true })
+  status: string | null;
 
-  @Column()
+  @Column({ default: true })
   activated: boolean;
 
-  @Column()
-  rememberToken: string;
+  @Column({ nullable: true, name: 'remember_token' })
+  rememberToken: string | null;
 
-  @Column()
+  @Column({ type: 'decimal', default: 0 })
   balance: number;
 
-  @Column()
+  @Column({ type: 'decimal', default: 110 })
   luong: number;
 
-  @Column()
+  @Column({ type: 'decimal', default: 0 })
   tongnap: number;
 
-  @Column()
+  @Column({ nullable: true })
   online: boolean;
 
-  @Column()
+  @Column({ default: 'user', nullable: true })
   role: string;
 
-  @Column()
+  @Column({ name: 'group_id', nullable: true })
   groupId: string;
 
-  @Column()
-  lastLoginAt: Date;
+  @Column({ type: 'timestamp', nullable: true, name: 'last_login_at' })
+  lastLoginAt: Date | null;
 
-  @Column()
+  @Column({ name: 'received_first_gift', nullable: true })
   receivedFirstGift: boolean;
 
-  @Column()
-  lastAttendanceAt: Date;
+  @Column({ type: 'bigint', nullable: true, name: 'last_attendance_at' })
+  lastAttendanceAt: number | null;
 
-  @Column()
-  ipAddress: string;
+  @Column({ type: 'simple-array', name: 'ip_address', nullable: true })
+  ipAddress: string[];
 
-  @Column()
-  levelReward: number;
+  @Column({ type: 'simple-array', name: 'level_reward', nullable: true })
+  levelReward: number[];
 
-  @Column()
-  note: string;
+  @Column({ nullable: true })
+  note: string | null;
 
-  @Column()
-  banUntil: Date;
+  @Column({ type: 'timestamp', nullable: true, name: 'ban_until' })
+  banUntil: Date | null;
 
-  @Column()
+  @Column({ type: 'timestamp', name: 'created_at', nullable: true })
   createdAt: Date;
 
-  @Column()
-  updatedAt: Date;
+  @Column({ type: 'timestamp', nullable: true, name: 'updated_at' })
+  updatedAt: Date | null;
 
-  @Column()
+  @Column({ nullable: true })
   kh: string;
 
-  @Column()
-  tempCode: string;
+  @Column({ nullable: true })
+  tempCode: string | null;
 
-  @Column()
-  efffan: number;
+  @Column({ type: 'decimal', default: 0, name: 'efffan' })
+  effFan: number;
 
-  @Column()
-  effvip: number;
+  @Column({ type: 'decimal', default: 1, name: 'effvip' })
+  effVip: number;
 
-  @Column()
-  efftop: number;
+  @Column({ type: 'decimal', default: 1, name: 'efftop' })
+  effTop: number;
 
-  @Column()
-  effytb: number;
+  @Column({ type: 'decimal', default: 0, name: 'effytb' })
+  effYtb: number;
 
-  @Column()
-  effdg: number;
+  @Column({ type: 'decimal', default: 0, name: 'effdg' })
+  effDg: number;
 
-  @Column()
-  effygt: number;
+  @Column({ type: 'decimal', default: 0, name: 'effygt' })
+  effYgt: number;
 
-  @Column()
-  effydc: number;
+  @Column({ type: 'decimal', default: 0, name: 'effydc' })
+  effYdc: number;
 
-  @Column()
-  effydh: number;
+  @Column({ type: 'decimal', default: 0, name: 'effydh' })
+  effYdh: number;
 
-  @Column()
+  @Column({ type: 'decimal', default: 0, name: 'amount_unpaid' })
   amountUnpaid: number;
 
-  @Column()
+  @Column({ type: 'decimal', default: 0, name: 'mcs' })
   mcs: number;
 
-  @Column()
+  @Column({ type: 'decimal', default: 0, name: 'vip' })
   vip: number;
 
-  @Column()
+  @Column({ type: 'decimal', default: 0, name: 'vnd' })
   vnd: number;
 
-  @Column()
-  mocvip: number;
+  @Column({ type: 'decimal', default: 0, name: 'mocvip' })
+  mocVip: number;
 
-  @Column()
-  nhanmocnap: number;
+  @Column({ type: 'decimal', default: 0, name: 'nhanmocnap' })
+  nhanMocNap: number;
 
-  @Column()
-  rewardtop: number;
+  @Column({ type: 'decimal', default: 0, name: 'rewardtop' })
+  rewardTop: number;
 }

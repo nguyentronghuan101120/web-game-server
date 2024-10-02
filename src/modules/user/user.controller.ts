@@ -35,6 +35,13 @@ export class UserController {
   async findOne(@Param('id') id: string): Promise<ResponseData<UserEntity>> {
     try {
       const user = await this.userService.findOne(id);
+      if (!user) {
+        return new ResponseData(
+          HttpStatus.NOT_FOUND,
+          HttpMessage.NOT_FOUND,
+          null,
+        );
+      }
       return new ResponseData<UserEntity>(HttpStatus.OK, HttpMessage.OK, user);
     } catch (error) {
       return new ResponseData(error.status, error.message, null);
