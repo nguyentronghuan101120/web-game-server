@@ -19,7 +19,7 @@ export class UserEntity {
   @Column({ nullable: true })
   phone: string | null;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, unique: true })
   email: string | null;
 
   @Column({ nullable: true })
@@ -34,7 +34,7 @@ export class UserEntity {
   @Column({ type: 'decimal', default: 0 })
   balance: number;
 
-  @Column({ type: 'decimal', default: 110 })
+  @Column({ type: 'decimal', default: 0 })
   luong: number;
 
   @Column({ type: 'decimal', default: 0 })
@@ -85,10 +85,10 @@ export class UserEntity {
   @Column({ type: 'decimal', default: 0, name: 'efffan' })
   effFan: number;
 
-  @Column({ type: 'decimal', default: 1, name: 'effvip' })
+  @Column({ type: 'decimal', default: 0, name: 'effvip' })
   effVip: number;
 
-  @Column({ type: 'decimal', default: 1, name: 'efftop' })
+  @Column({ type: 'decimal', default: 0, name: 'efftop' })
   effTop: number;
 
   @Column({ type: 'decimal', default: 0, name: 'effytb' })

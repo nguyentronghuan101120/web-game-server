@@ -4,10 +4,15 @@ import { HttpMessage, HttpStatus } from 'src/global/http.status';
 import { AuthService } from './auth.service';
 import { LoginRequestDto } from 'src/dto/auth/login.request.dto';
 import { LoginResponseDto } from 'src/dto/auth/login.response.dto';
+import { UserRegistrationDto } from 'src/dto/user/user.registration.dto';
+import { UserService } from '../user/user.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly userService: UserService,
+  ) {}
 
   @Post('login')
   async login(
@@ -15,6 +20,22 @@ export class AuthController {
   ): Promise<ResponseData<LoginResponseDto>> {
     try {
       const data = await this.authService.login(loginRequestDto);
+      return new ResponseData<LoginResponseDto>(
+        HttpStatus.OK,
+        HttpMessage.OK,
+        data,
+      );
+    } catch (error) {
+      return new ResponseData(error.status, error.message, null);
+    }
+  }
+
+  @Post('/register')
+  async register(
+    @Body() userDto: UserRegistrationDto,
+  ): Promise<ResponseData<LoginResponseDto>> {
+    try {
+      const data = await this.authService.register(userDto);
       return new ResponseData<LoginResponseDto>(
         HttpStatus.OK,
         HttpMessage.OK,

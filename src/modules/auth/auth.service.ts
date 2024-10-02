@@ -3,6 +3,7 @@ import { UserService } from '../user/user.service';
 import { LoginResponseDto } from 'src/dto/auth/login.response.dto';
 import { comparePassword } from 'src/utils/bcrypt';
 import { LoginRequestDto } from 'src/dto/auth/login.request.dto';
+import { UserRegistrationDto } from 'src/dto/user/user.registration.dto';
 
 @Injectable()
 export class AuthService {
@@ -28,6 +29,11 @@ export class AuthService {
     // };
     // const accessToken = await this.jwtService.signAsync(payload);
 
+    return new LoginResponseDto(user.username, 'abc');
+  }
+
+  async register(userDto: UserRegistrationDto): Promise<LoginResponseDto> {
+    const user = await this.userService.create(userDto);
     return new LoginResponseDto(user.username, 'abc');
   }
 }

@@ -10,8 +10,9 @@ import {
 import { UserService } from './user.service';
 import { ResponseData } from 'src/global/response.data';
 import { HttpMessage, HttpStatus } from 'src/global/http.status';
-import { UserDto } from 'src/dto/user.dto';
 import { UserEntity } from 'src/entities/user.entities';
+import { UserRegistrationDto } from 'src/dto/user/user.registration.dto';
+import { UserUpdateDto } from 'src/dto/user/user.update.dto';
 
 @Controller('users')
 export class UserController {
@@ -49,7 +50,9 @@ export class UserController {
   }
 
   @Post()
-  async create(@Body() userDto: UserDto): Promise<ResponseData<UserDto>> {
+  async create(
+    @Body() userDto: UserRegistrationDto,
+  ): Promise<ResponseData<UserRegistrationDto>> {
     try {
       const user = await this.userService.create(userDto);
       return new ResponseData(HttpStatus.CREATED, HttpMessage.CREATED, user);
@@ -61,7 +64,7 @@ export class UserController {
   @Put(':id')
   async update(
     @Param('id') id: string,
-    @Body() userDto: UserDto,
+    @Body() userDto: UserUpdateDto,
   ): Promise<ResponseData<UserEntity>> {
     try {
       const user = await this.userService.update(id, userDto);
