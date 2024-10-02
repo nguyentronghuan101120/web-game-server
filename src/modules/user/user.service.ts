@@ -33,11 +33,28 @@ export class UserService {
   }
 
   async update(id: string, userDto: UserDto): Promise<UserEntity> {
-    await this.userRepository.update(id, userDto);
-    return this.findOne(id);
+    try {
+      const user = await this.userRepository.findOneBy({ id: parseInt(id) });
+      if (!user) {
+        throw new BadRequestException(`User with ID: ${id} not found`);
+      }
+      userDto.password = encodePassword(userDto.password);
+      await this.userRepository.update(id, userDto);
+      return this.findOne(id);
+    } catch {
+      throw new BadRequestException(`User not found`);
+    }
   }
 
   async delete(id: string): Promise<void> {
-    await this.userRepository.delete(id);
+    try {
+      const user = await this.userRepository.findOneBy({ id: parseInt(id) });
+      if (!user) {
+        throw new BadRequestException(`User with ID: ${id} not found`);
+      }
+      await this.userRepository.delete(id);
+    } catch {
+      throw new BadRequestException(`User not found`);
+    }
   }
 }
