@@ -22,16 +22,25 @@ export class UserService {
     return await this.userRepository.findOneBy({ id: parseInt(id) });
   }
 
-  async create(userDto: UserRegistrationDto): Promise<UserEntity> {
-    try {
-      const user = this.userRepository.create(userDto);
-      user.password = encodePassword(user.password);
-      return await this.userRepository.save(user);
-    } catch {
-      throw new BadRequestException(NotifyMessage.USER_ALREADY_EXISTS);
-    }
+  async findOneByUsername(username: string): Promise<UserEntity> {
+    return await this.userRepository.findOne({
+      where: [{ username: username }, { email: username }],
+    });
   }
 
+  async findOneByEmail(email: string): Promise<UserEntity> {
+    return await this.userRepository.findOneBy({ email: email });
+  }
+
+  async create(userDto: UserRegistrationDto): Promise<UserEntity> {
+    const user = this.userRepository.create(userDto);
+    user.password = encodePassword(user.password);
+    return await this.userRepository.save(user);
+  }
+
+  async store(userDto: UserUpdateDto): Promise<UserEntity> {
+    return this.userRepository.save(userDto);
+  }
   async update(id: string, userDto: UserUpdateDto): Promise<UserEntity> {
     try {
       const user = await this.userRepository.findOneBy({ id: parseInt(id) });

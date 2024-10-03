@@ -6,6 +6,7 @@ import {
   Delete,
   Param,
   Body,
+  HttpException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { ResponseData } from 'src/global/response.data';
@@ -57,7 +58,7 @@ export class UserController {
       const user = await this.userService.create(userDto);
       return new ResponseData(HttpStatus.CREATED, HttpMessage.CREATED, user);
     } catch (error) {
-      return new ResponseData(error.status, error.message, null);
+      throw new HttpException(error.message, error.status);
     }
   }
 

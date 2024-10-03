@@ -1,4 +1,4 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, HttpException } from '@nestjs/common';
 import { ResponseData } from 'src/global/response.data';
 import { HttpMessage, HttpStatus } from 'src/global/http.status';
 import { AuthService } from './auth.service';
@@ -22,11 +22,11 @@ export class AuthController {
       const data = await this.authService.login(loginRequestDto);
       return new ResponseData<LoginResponseDto>(
         HttpStatus.OK,
-        HttpMessage.OK,
+        HttpMessage.SIGN_IN_SUCCESS,
         data,
       );
     } catch (error) {
-      return new ResponseData(error.status, error.message, null);
+      throw new ResponseData(error.status, error.message, null);
     }
   }
 
@@ -38,11 +38,20 @@ export class AuthController {
       const data = await this.authService.register(userDto);
       return new ResponseData<LoginResponseDto>(
         HttpStatus.OK,
-        HttpMessage.OK,
+        HttpMessage.SIGN_UP_SUCCESS,
         data,
       );
     } catch (error) {
-      return new ResponseData(error.status, error.message, null);
+      if (error.code === 'ER_DUP_ENTRY') {
+        throw new HttpException(
+          HttpMessage.USER_ALREADY_EXISTS,
+          HttpStatus.CONFLICT,
+        );
+      }
+      throw new HttpException(
+        HttpMessage.INTERNAL_SERVER_ERROR,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 }
