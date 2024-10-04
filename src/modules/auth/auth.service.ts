@@ -40,7 +40,6 @@ export class AuthService {
   }
 
   async register(userDto: UserRegistrationDto): Promise<LoginResponseDto> {
-    console.log(userDto.password);
     await this.userService.create(userDto);
     return;
   }

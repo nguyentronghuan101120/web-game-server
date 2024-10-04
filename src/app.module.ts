@@ -38,6 +38,5 @@ export class AppModule {
   constructor() {
     const logger = new Logger('TypeOrmModule');
     logger.log('Database connection established');
-    console.log(process.env.JWT_SECRET);
   }
 }
