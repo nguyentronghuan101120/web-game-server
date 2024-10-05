@@ -22,7 +22,9 @@ export class UserController {
   @Get()
   async findAll(): Promise<ResponseData<UserEntity[]>> {
     try {
-      const users = await this.userService.findAll();
+      const users = (await this.userService.findAll()).sort(
+        (a, b) => b.id - a.id,
+      );
       return new ResponseData<UserEntity[]>(
         HttpStatus.OK,
         HttpMessage.OK,
