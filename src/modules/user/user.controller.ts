@@ -29,7 +29,7 @@ export class UserController {
         users,
       );
     } catch (error) {
-      return new ResponseData(error.status, error.message, null);
+      throw new HttpException(error.message, error.status);
     }
   }
 
@@ -46,7 +46,7 @@ export class UserController {
       }
       return new ResponseData<UserEntity>(HttpStatus.OK, HttpMessage.OK, user);
     } catch (error) {
-      return new ResponseData(error.status, error.message, null);
+      throw new HttpException(error.message, error.status);
     }
   }
 
@@ -58,6 +58,12 @@ export class UserController {
       const user = await this.userService.create(userDto);
       return new ResponseData(HttpStatus.CREATED, HttpMessage.CREATED, user);
     } catch (error) {
+      if (error.code === 'ER_DUP_ENTRY') {
+        throw new HttpException(
+          HttpMessage.USER_ALREADY_EXISTS,
+          HttpStatus.CONFLICT,
+        );
+      }
       throw new HttpException(error.message, error.status);
     }
   }
@@ -71,7 +77,7 @@ export class UserController {
       const user = await this.userService.update(id, userDto);
       return new ResponseData(HttpStatus.OK, HttpMessage.OK, user);
     } catch (error) {
-      return new ResponseData(error.status, error.message, null);
+      throw new HttpException(error.message, error.status);
     }
   }
 
@@ -85,7 +91,7 @@ export class UserController {
         `User with ID: ${id} deleted`,
       );
     } catch (error) {
-      return new ResponseData(error.status, error.message, null);
+      throw new HttpException(error.message, error.status);
     }
   }
 }

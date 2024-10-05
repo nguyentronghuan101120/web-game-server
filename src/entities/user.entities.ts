@@ -26,7 +26,7 @@ export class UserEntity {
   status: string | null;
 
   @Column({ default: true })
-  activated: boolean;
+  activated: number;
 
   @Column({ nullable: true, name: 'remember_token' })
   rememberToken: string | null;
