@@ -18,11 +18,14 @@ export class AuthService {
   async login(loginRequestDto: LoginRequestDto): Promise<LoginResponseDto> {
     const data = loginRequestDto;
     data.username = data.username.toLowerCase() ?? data.email.toLowerCase();
+    const password = await this.userService.findOneByUsernameAndGetPassword(
+      data.username,
+    );
     const user = await this.userService.findOneByUsername(data.username);
-    if (!user) {
+    if (!password) {
       throw new UnauthorizedException(HttpMessage.USER_NOT_FOUND);
     }
-    const isPasswordValid = await comparePassword(data.password, user.password);
+    const isPasswordValid = await comparePassword(data.password, password);
     if (!isPasswordValid) {
       throw new UnauthorizedException(HttpMessage.PASSWORD_INCORRECT);
     }

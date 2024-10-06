@@ -11,21 +11,21 @@ import {
 import { UserService } from './user.service';
 import { ResponseData } from 'src/global/response.data';
 import { HttpMessage, HttpStatus } from 'src/global/http.status';
-import { UserEntity } from 'src/entities/user.entities';
 import { UserRegistrationDto } from 'src/dto/user/user.registration.dto';
-import { UserUpdateDto } from 'src/dto/user/user.update.dto';
+import { UserResponseDto } from 'src/dto/user/user.response.dto';
+import { UserRequestDto } from 'src/dto/user/user.request.dto';
 
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  async findAll(): Promise<ResponseData<UserEntity[]>> {
+  async findAll(): Promise<ResponseData<UserResponseDto[]>> {
     try {
       const users = (await this.userService.findAll()).sort(
         (a, b) => b.id - a.id,
       );
-      return new ResponseData<UserEntity[]>(
+      return new ResponseData<UserResponseDto[]>(
         HttpStatus.OK,
         HttpMessage.OK,
         users,
@@ -36,7 +36,9 @@ export class UserController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<ResponseData<UserEntity>> {
+  async findOne(
+    @Param('id') id: string,
+  ): Promise<ResponseData<UserResponseDto>> {
     try {
       const user = await this.userService.findOne(id);
       if (!user) {
@@ -46,7 +48,11 @@ export class UserController {
           null,
         );
       }
-      return new ResponseData<UserEntity>(HttpStatus.OK, HttpMessage.OK, user);
+      return new ResponseData<UserResponseDto>(
+        HttpStatus.OK,
+        HttpMessage.OK,
+        user,
+      );
     } catch (error) {
       throw new HttpException(error.message, error.status);
     }
@@ -55,7 +61,7 @@ export class UserController {
   @Post()
   async create(
     @Body() userDto: UserRegistrationDto,
-  ): Promise<ResponseData<UserRegistrationDto>> {
+  ): Promise<ResponseData<UserResponseDto>> {
     try {
       const user = await this.userService.create(userDto);
       return new ResponseData(HttpStatus.CREATED, HttpMessage.CREATED, user);
@@ -73,12 +79,18 @@ export class UserController {
   @Put(':id')
   async update(
     @Param('id') id: string,
-    @Body() userDto: UserUpdateDto,
-  ): Promise<ResponseData<UserEntity>> {
+    @Body() userDto: UserRequestDto,
+  ): Promise<ResponseData<UserResponseDto>> {
     try {
       const user = await this.userService.update(id, userDto);
       return new ResponseData(HttpStatus.OK, HttpMessage.OK, user);
     } catch (error) {
+      if (error.code === 'ER_DUP_ENTRY') {
+        throw new HttpException(
+          HttpMessage.USER_ALREADY_EXISTS,
+          HttpStatus.CONFLICT,
+        );
+      }
       throw new HttpException(error.message, error.status);
     }
   }
@@ -87,11 +99,7 @@ export class UserController {
   async delete(@Param('id') id: string): Promise<ResponseData<string>> {
     try {
       await this.userService.delete(id);
-      return new ResponseData(
-        HttpStatus.OK,
-        HttpMessage.OK,
-        `User with ID: ${id} deleted`,
-      );
+      return new ResponseData(HttpStatus.OK, HttpMessage.OK, null);
     } catch (error) {
       throw new HttpException(error.message, error.status);
     }

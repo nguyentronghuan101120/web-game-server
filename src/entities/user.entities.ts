@@ -43,8 +43,8 @@ export class UserEntity {
   @Column({ nullable: true })
   online: boolean;
 
-  @Column({ default: 'user', nullable: true })
-  role: string;
+  @Column({ default: 0, nullable: true })
+  role: number;
 
   @Column({ name: 'group_id', nullable: true })
   groupId: string;

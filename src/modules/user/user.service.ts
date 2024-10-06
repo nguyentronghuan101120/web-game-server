@@ -1,11 +1,17 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserEntity } from 'src/entities/user.entities';
 import { encodePassword } from 'src/utils/bcrypt';
 import { UserRegistrationDto } from 'src/dto/user/user.registration.dto';
-import { UserUpdateDto } from 'src/dto/user/user.update.dto';
 import { NotifyMessage } from 'src/constants/notify-message';
+import { UserResponseDto } from 'src/dto/user/user.response.dto';
+import { UserRequestDto } from 'src/dto/user/user.request.dto';
 
 @Injectable()
 export class UserService {
@@ -14,34 +20,72 @@ export class UserService {
     private userRepository: Repository<UserEntity>,
   ) {}
 
-  async findAll(): Promise<UserEntity[]> {
-    return await this.userRepository.find();
+  private mapToUserResponseDto(user: UserEntity): UserResponseDto {
+    return {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      lastLoginAt: user.lastLoginAt,
+      activated: user.activated,
+    };
   }
 
-  async findOne(id: string): Promise<UserEntity> {
-    return await this.userRepository.findOneBy({ id: parseInt(id) });
+  async findAll(): Promise<UserResponseDto[]> {
+    const users = await this.userRepository.find();
+    return users.map(this.mapToUserResponseDto);
   }
 
-  async findOneByUsername(username: string): Promise<UserEntity> {
-    return await this.userRepository.findOne({
+  async findOne(id: string): Promise<UserResponseDto> {
+    const user = await this.userRepository.findOneBy({ id: parseInt(id) });
+    if (!user) {
+      throw new BadRequestException(NotifyMessage.USER_NOT_FOUND);
+    }
+    return this.mapToUserResponseDto(user);
+  }
+
+  async findOneByUsername(username: string): Promise<UserResponseDto> {
+    const user = await this.userRepository.findOne({
       where: [{ username: username }, { email: username }],
     });
+    if (!user) {
+      throw new BadRequestException(NotifyMessage.USER_NOT_FOUND);
+    }
+    return this.mapToUserResponseDto(user);
   }
 
-  async findOneByEmail(email: string): Promise<UserEntity> {
-    return await this.userRepository.findOneBy({ email: email });
+  async findOneByUsernameAndGetPassword(username: string): Promise<string> {
+    const user = await this.userRepository.findOne({
+      where: [{ username: username }, { email: username }],
+    });
+    if (!user) {
+      throw new BadRequestException(NotifyMessage.USER_NOT_FOUND);
+    }
+    return user.password;
   }
 
-  async create(userDto: UserRegistrationDto): Promise<UserEntity> {
+  async findOneByEmail(email: string): Promise<UserResponseDto> {
+    const user = await this.userRepository.findOneBy({ email: email });
+    if (!user) {
+      throw new BadRequestException(NotifyMessage.USER_NOT_FOUND);
+    }
+    return this.mapToUserResponseDto(user);
+  }
+
+  async create(userDto: UserRegistrationDto): Promise<UserResponseDto> {
     const user = this.userRepository.create(userDto);
     user.password = encodePassword(user.password);
-    return await this.userRepository.save(user);
+    const newUser = await this.userRepository.save(user);
+    return this.mapToUserResponseDto(newUser);
   }
 
-  async store(userDto: UserUpdateDto): Promise<UserEntity> {
-    return this.userRepository.save(userDto);
+  async store(userDto: UserResponseDto): Promise<UserResponseDto> {
+    const user = this.userRepository.create(userDto);
+    const newUser = await this.userRepository.save(user);
+    return this.mapToUserResponseDto(newUser);
   }
-  async update(id: string, userDto: UserUpdateDto): Promise<UserEntity> {
+
+  async update(id: string, userDto: UserRequestDto): Promise<UserResponseDto> {
     try {
       const user = await this.userRepository.findOneBy({ id: parseInt(id) });
       if (!user) {
@@ -50,8 +94,8 @@ export class UserService {
       userDto.password = encodePassword(userDto.password);
       await this.userRepository.update(id, userDto);
       return this.findOne(id);
-    } catch {
-      throw new BadRequestException(NotifyMessage.USER_NOT_FOUND);
+    } catch (error) {
+      throw error;
     }
   }
 
@@ -59,11 +103,14 @@ export class UserService {
     try {
       const user = await this.userRepository.findOneBy({ id: parseInt(id) });
       if (!user) {
-        throw new BadRequestException(NotifyMessage.USER_NOT_FOUND);
+        throw new HttpException(
+          NotifyMessage.USER_NOT_FOUND,
+          HttpStatus.NOT_FOUND,
+        );
       }
       await this.userRepository.delete(id);
-    } catch {
-      throw new BadRequestException(NotifyMessage.USER_NOT_FOUND);
+    } catch (error) {
+      throw error;
     }
   }
 }
