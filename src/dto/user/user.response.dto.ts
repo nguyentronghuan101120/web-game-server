@@ -3,6 +3,6 @@ export class UserResponseDto {
   username: string;
   email: string;
   role: number;
-  lastLoginAt: Date;
+  lastLoginWebAt: Date;
   activated: number;
 }

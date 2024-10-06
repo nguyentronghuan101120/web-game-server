@@ -1,9 +1,20 @@
+import { UserResponseDto } from '../user/user.response.dto';
+
 export class LoginResponseDto {
   accessToken: string;
-  username: string;
+  refreshToken: string;
+  user: UserResponseDto;
+  tokenExpiry: number;
 
-  constructor(username: string, accessToken: string) {
+  constructor(
+    accessToken: string,
+    refreshToken: string,
+    user: UserResponseDto,
+    tokenExpiry: number,
+  ) {
     this.accessToken = accessToken;
-    this.username = username;
+    this.refreshToken = refreshToken;
+    this.user = user;
+    this.tokenExpiry = tokenExpiry;
   }
 }

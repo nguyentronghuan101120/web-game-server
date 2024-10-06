@@ -1,23 +1,26 @@
-import { Controller, Post, Body, HttpException } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  HttpException,
+  HttpCode,
+} from '@nestjs/common';
 import { ResponseData } from 'src/global/response.data';
 import { HttpMessage, HttpStatus } from 'src/global/http.status';
 import { AuthService } from './auth.service';
 import { LoginRequestDto } from 'src/dto/auth/login.request.dto';
 import { LoginResponseDto } from 'src/dto/auth/login.response.dto';
 import { UserRegistrationDto } from 'src/dto/user/user.registration.dto';
-import { UserService } from '../user/user.service';
+import { Public } from 'src/utils/public-metadata';
 
 @Controller('auth')
 export class AuthController {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly userService: UserService,
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
   @Post('login')
-  async login(
-    @Body() loginRequestDto: LoginRequestDto,
-  ): Promise<ResponseData<LoginResponseDto>> {
+  @HttpCode(HttpStatus.OK)
+  @Public()
+  async login(@Body() loginRequestDto: LoginRequestDto): Promise<any> {
     try {
       const data = await this.authService.login(loginRequestDto);
       return new ResponseData<LoginResponseDto>(
@@ -26,11 +29,12 @@ export class AuthController {
         data,
       );
     } catch (error) {
-      throw new ResponseData(error.status, error.message, null);
+      throw new HttpException(error.message, error.status);
     }
   }
 
   @Post('/register')
+  @Public()
   async register(
     @Body() userDto: UserRegistrationDto,
   ): Promise<ResponseData<LoginResponseDto>> {

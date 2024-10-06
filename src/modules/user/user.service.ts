@@ -26,7 +26,7 @@ export class UserService {
       username: user.username,
       email: user.email,
       role: user.role,
-      lastLoginAt: user.lastLoginAt,
+      lastLoginWebAt: user.lastLoginWebAt,
       activated: user.activated,
     };
   }

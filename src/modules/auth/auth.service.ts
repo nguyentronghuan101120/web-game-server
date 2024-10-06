@@ -5,8 +5,8 @@ import { LoginResponseDto } from 'src/dto/auth/login.response.dto';
 import { comparePassword } from 'src/utils/bcrypt';
 import { LoginRequestDto } from 'src/dto/auth/login.request.dto';
 import { UserRegistrationDto } from 'src/dto/user/user.registration.dto';
-import { JwtPayload } from './auth.guard';
 import { HttpMessage } from 'src/global/http.status';
+import { JwtPayload } from 'src/utils/payload';
 
 @Injectable()
 export class AuthService {
@@ -16,34 +16,63 @@ export class AuthService {
   ) {}
 
   async login(loginRequestDto: LoginRequestDto): Promise<LoginResponseDto> {
-    const data = loginRequestDto;
-    data.username = data.username.toLowerCase() ?? data.email.toLowerCase();
-    const password = await this.userService.findOneByUsernameAndGetPassword(
-      data.username,
-    );
-    const user = await this.userService.findOneByUsername(data.username);
-    if (!password) {
-      throw new UnauthorizedException(HttpMessage.USER_NOT_FOUND);
+    try {
+      const data = loginRequestDto;
+      // Ensure that either username or email is provided
+      if (!data.username && !data.email) {
+        throw new UnauthorizedException(HttpMessage.USER_NOT_FOUND);
+      }
+      // Use username if available, otherwise use email
+      data.username = (data.username || data.email).toLowerCase();
+      const password = await this.userService.findOneByUsernameAndGetPassword(
+        data.username,
+      );
+      const user = await this.userService.findOneByUsername(data.username);
+      if (!password) {
+        throw new UnauthorizedException(HttpMessage.USER_NOT_FOUND);
+      }
+      const isPasswordValid = await comparePassword(data.password, password);
+      if (!isPasswordValid) {
+        throw new UnauthorizedException(HttpMessage.PASSWORD_INCORRECT);
+      }
+
+      user.lastLoginWebAt = new Date();
+      await this.userService.store(user);
+      const payload: JwtPayload = {
+        userId: user.id,
+        email: user.email,
+        username: user.username,
+        role: user.role,
+      };
+
+      const accessToken = await this.jwtService.signAsync(payload);
+      const refreshToken = await this.jwtService.signAsync(payload, {
+        expiresIn: process.env.JWT_REFRESH_EXPIRES_IN,
+      });
+      const tokenExpiry = parseInt(process.env.JWT_EXPIRES_IN);
+      return {
+        accessToken,
+        refreshToken,
+        user,
+        tokenExpiry,
+      };
+    } catch (error) {
+      throw error;
     }
-    const isPasswordValid = await comparePassword(data.password, password);
-    if (!isPasswordValid) {
-      throw new UnauthorizedException(HttpMessage.PASSWORD_INCORRECT);
-    }
-
-    user.lastLoginAt = new Date();
-    await this.userService.store(user);
-    const payload: JwtPayload = {
-      userId: user.id,
-      email: user.email,
-    };
-
-    const accessToken = await this.jwtService.signAsync(payload);
-
-    return new LoginResponseDto(user.username, accessToken);
   }
 
   async register(userDto: UserRegistrationDto): Promise<LoginResponseDto> {
     await this.userService.register(userDto);
     return;
   }
+
+  // async refreshToken(refreshToken: string): Promise<LoginResponseDto> {
+  //   const payload = await this.jwtService.verifyAsync(refreshToken);
+  //   const accessToken = await this.jwtService.signAsync(payload);
+  //   return new LoginResponseDto(accessToken, refreshToken);
+  // }
+
+  // async logout(userId: string): Promise<void> {
+  //   await this.userService.update(userId, { refreshToken: null });
+  // }
 }

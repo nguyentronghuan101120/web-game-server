@@ -52,6 +52,9 @@ export class UserEntity {
   @Column({ type: 'timestamp', nullable: true, name: 'last_login_at' })
   lastLoginAt: Date | null;
 
+  @Column({ type: 'timestamp', nullable: true, name: 'last_login_web_at' })
+  lastLoginWebAt: Date | null;
+
   @Column({ name: 'received_first_gift', nullable: true })
   receivedFirstGift: boolean;
 
