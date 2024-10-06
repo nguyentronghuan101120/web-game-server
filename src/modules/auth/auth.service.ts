@@ -43,7 +43,7 @@ export class AuthService {
   }
 
   async register(userDto: UserRegistrationDto): Promise<LoginResponseDto> {
-    await this.userService.create(userDto);
+    await this.userService.register(userDto);
     return;
   }
 }

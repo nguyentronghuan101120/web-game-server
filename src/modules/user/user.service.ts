@@ -72,7 +72,13 @@ export class UserService {
     return this.mapToUserResponseDto(user);
   }
 
-  async create(userDto: UserRegistrationDto): Promise<UserResponseDto> {
+  async register(userDto: UserRegistrationDto): Promise<void> {
+    const user = this.userRepository.create(userDto);
+    user.password = encodePassword(user.password);
+    await this.userRepository.save(user);
+  }
+
+  async create(userDto: UserRequestDto): Promise<UserResponseDto> {
     const user = this.userRepository.create(userDto);
     user.password = encodePassword(user.password);
     const newUser = await this.userRepository.save(user);
@@ -91,7 +97,9 @@ export class UserService {
       if (!user) {
         throw new BadRequestException(NotifyMessage.USER_NOT_FOUND);
       }
-      userDto.password = encodePassword(userDto.password);
+      if (userDto.password && userDto.password.length > 0) {
+        userDto.password = encodePassword(userDto.password);
+      }
       await this.userRepository.update(id, userDto);
       return this.findOne(id);
     } catch (error) {

@@ -11,7 +11,6 @@ import {
 import { UserService } from './user.service';
 import { ResponseData } from 'src/global/response.data';
 import { HttpMessage, HttpStatus } from 'src/global/http.status';
-import { UserRegistrationDto } from 'src/dto/user/user.registration.dto';
 import { UserResponseDto } from 'src/dto/user/user.response.dto';
 import { UserRequestDto } from 'src/dto/user/user.request.dto';
 
@@ -60,7 +59,7 @@ export class UserController {
 
   @Post()
   async create(
-    @Body() userDto: UserRegistrationDto,
+    @Body() userDto: UserRequestDto,
   ): Promise<ResponseData<UserResponseDto>> {
     try {
       const user = await this.userService.create(userDto);
