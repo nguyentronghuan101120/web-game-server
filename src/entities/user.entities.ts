@@ -14,9 +14,6 @@ export class UserEntity {
   password: string;
 
   @Column({ nullable: true })
-  name: string | null;
-
-  @Column({ nullable: true })
   phone: string | null;
 
   @Column({ nullable: true, unique: true })
