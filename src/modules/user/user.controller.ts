@@ -13,12 +13,15 @@ import { ResponseData } from 'src/global/response.data';
 import { HttpMessage, HttpStatus } from 'src/global/http.status';
 import { UserResponseDto } from 'src/dto/user/user.response.dto';
 import { UserRequestDto } from 'src/dto/user/user.request.dto';
+import { Role } from 'src/global/role.type';
+import { Roles } from 'src/utils/roles.metadata';
 
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
+  @Roles(Role.Admin)
   async findAll(): Promise<ResponseData<UserResponseDto[]>> {
     try {
       const users = (await this.userService.findAll()).sort(
@@ -35,6 +38,7 @@ export class UserController {
   }
 
   @Get(':id')
+  @Roles(Role.Admin)
   async findOne(
     @Param('id') id: string,
   ): Promise<ResponseData<UserResponseDto>> {
@@ -58,6 +62,7 @@ export class UserController {
   }
 
   @Post()
+  @Roles(Role.Admin)
   async create(
     @Body() userDto: UserRequestDto,
   ): Promise<ResponseData<UserResponseDto>> {
@@ -76,6 +81,7 @@ export class UserController {
   }
 
   @Put(':id')
+  @Roles(Role.Admin)
   async update(
     @Param('id') id: string,
     @Body() userDto: UserRequestDto,
@@ -95,6 +101,7 @@ export class UserController {
   }
 
   @Delete(':id')
+  @Roles(Role.Admin)
   async delete(@Param('id') id: string): Promise<ResponseData<string>> {
     try {
       await this.userService.delete(id);
