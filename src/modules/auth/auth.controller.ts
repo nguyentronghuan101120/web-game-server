@@ -5,13 +5,15 @@ import {
   HttpException,
   HttpCode,
 } from '@nestjs/common';
-import { ResponseData } from 'src/global/response.data';
 import { HttpMessage, HttpStatus } from 'src/global/http.status';
 import { AuthService } from './auth.service';
 import { LoginRequestDto } from 'src/dto/auth/login.request.dto';
 import { LoginResponseDto } from 'src/dto/auth/login.response.dto';
-import { UserRegistrationDto } from 'src/dto/user/user.registration.dto';
 import { Public } from 'src/utils/public-metadata';
+import { ResponseDataWithEncryption } from 'src/global/response.data-with-encryption';
+import { ResponseData } from 'src/global/response-data';
+import { RequestData } from 'src/global/request.data';
+import { DataEncryption } from 'src/utils/data-encryption';
 
 @Controller('auth')
 export class AuthController {
@@ -20,7 +22,26 @@ export class AuthController {
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @Public()
-  async login(@Body() loginRequestDto: LoginRequestDto): Promise<any> {
+  async login(@Body() data: RequestData): Promise<any> {
+    try {
+      const loginRequestDto = DataEncryption().decrypt(data.data);
+      const response = await this.authService.login(loginRequestDto);
+      return new ResponseDataWithEncryption<LoginResponseDto>(
+        HttpStatus.OK,
+        HttpMessage.SIGN_IN_SUCCESS,
+        response,
+      );
+    } catch (error) {
+      throw new HttpException(error.message, error.status);
+    }
+  }
+
+  @Post('login-for-postman')
+  @HttpCode(HttpStatus.OK)
+  @Public()
+  async loginForPostman(
+    @Body() loginRequestDto: LoginRequestDto,
+  ): Promise<any> {
     try {
       const data = await this.authService.login(loginRequestDto);
       return new ResponseData<LoginResponseDto>(
@@ -36,14 +57,15 @@ export class AuthController {
   @Post('/register')
   @Public()
   async register(
-    @Body() userDto: UserRegistrationDto,
-  ): Promise<ResponseData<LoginResponseDto>> {
+    @Body() data: RequestData,
+  ): Promise<ResponseDataWithEncryption<LoginResponseDto>> {
     try {
-      const data = await this.authService.register(userDto);
-      return new ResponseData<LoginResponseDto>(
+      const dataDecrypted = DataEncryption().decrypt(data.data);
+      const response = await this.authService.register(dataDecrypted);
+      return new ResponseDataWithEncryption<LoginResponseDto>(
         HttpStatus.OK,
         HttpMessage.SIGN_UP_SUCCESS,
-        data,
+        response,
       );
     } catch (error) {
       if (error.code === 'ER_DUP_ENTRY') {

@@ -9,12 +9,13 @@ import {
   HttpException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { ResponseData } from 'src/global/response.data';
 import { HttpMessage, HttpStatus } from 'src/global/http.status';
 import { UserResponseDto } from 'src/dto/user/user.response.dto';
-import { UserRequestDto } from 'src/dto/user/user.request.dto';
 import { Role } from 'src/global/role.type';
 import { Roles } from 'src/utils/roles.metadata';
+import { ResponseDataWithEncryption } from 'src/global/response.data-with-encryption';
+import { DataEncryption } from 'src/utils/data-encryption';
+import { RequestData } from 'src/global/request.data';
 
 @Controller('users')
 export class UserController {
@@ -22,12 +23,12 @@ export class UserController {
 
   @Get()
   @Roles(Role.Admin)
-  async findAll(): Promise<ResponseData<UserResponseDto[]>> {
+  async findAll(): Promise<ResponseDataWithEncryption<UserResponseDto[]>> {
     try {
       const users = (await this.userService.findAll()).sort(
         (a, b) => b.id - a.id,
       );
-      return new ResponseData<UserResponseDto[]>(
+      return new ResponseDataWithEncryption<UserResponseDto[]>(
         HttpStatus.OK,
         HttpMessage.OK,
         users,
@@ -41,17 +42,17 @@ export class UserController {
   @Roles(Role.Admin)
   async findOne(
     @Param('id') id: string,
-  ): Promise<ResponseData<UserResponseDto>> {
+  ): Promise<ResponseDataWithEncryption<UserResponseDto>> {
     try {
       const user = await this.userService.findOne(id);
       if (!user) {
-        return new ResponseData(
+        return new ResponseDataWithEncryption<UserResponseDto>(
           HttpStatus.NOT_FOUND,
           HttpMessage.NOT_FOUND,
           null,
         );
       }
-      return new ResponseData<UserResponseDto>(
+      return new ResponseDataWithEncryption<UserResponseDto>(
         HttpStatus.OK,
         HttpMessage.OK,
         user,
@@ -64,11 +65,16 @@ export class UserController {
   @Post()
   @Roles(Role.Admin)
   async create(
-    @Body() userDto: UserRequestDto,
-  ): Promise<ResponseData<UserResponseDto>> {
+    @Body() data: RequestData,
+  ): Promise<ResponseDataWithEncryption<UserResponseDto>> {
     try {
+      const userDto = DataEncryption().decrypt(data.data);
       const user = await this.userService.create(userDto);
-      return new ResponseData(HttpStatus.CREATED, HttpMessage.CREATED, user);
+      return new ResponseDataWithEncryption<UserResponseDto>(
+        HttpStatus.CREATED,
+        HttpMessage.CREATED,
+        user,
+      );
     } catch (error) {
       if (error.code === 'ER_DUP_ENTRY') {
         throw new HttpException(
@@ -84,11 +90,16 @@ export class UserController {
   @Roles(Role.Admin)
   async update(
     @Param('id') id: string,
-    @Body() userDto: UserRequestDto,
-  ): Promise<ResponseData<UserResponseDto>> {
+    @Body() data: RequestData,
+  ): Promise<ResponseDataWithEncryption<UserResponseDto>> {
     try {
+      const userDto = DataEncryption().decrypt(data.data);
       const user = await this.userService.update(id, userDto);
-      return new ResponseData(HttpStatus.OK, HttpMessage.OK, user);
+      return new ResponseDataWithEncryption<UserResponseDto>(
+        HttpStatus.OK,
+        HttpMessage.OK,
+        user,
+      );
     } catch (error) {
       if (error.code === 'ER_DUP_ENTRY') {
         throw new HttpException(
@@ -102,10 +113,16 @@ export class UserController {
 
   @Delete(':id')
   @Roles(Role.Admin)
-  async delete(@Param('id') id: string): Promise<ResponseData<string>> {
+  async delete(
+    @Param('id') id: string,
+  ): Promise<ResponseDataWithEncryption<string>> {
     try {
       await this.userService.delete(id);
-      return new ResponseData(HttpStatus.OK, HttpMessage.OK, null);
+      return new ResponseDataWithEncryption<string>(
+        HttpStatus.OK,
+        HttpMessage.OK,
+        null,
+      );
     } catch (error) {
       throw new HttpException(error.message, error.status);
     }
