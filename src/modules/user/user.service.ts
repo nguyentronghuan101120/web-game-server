@@ -6,13 +6,13 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { UserEntity } from 'src/entities/user.entities';
 import { encodePassword } from 'src/utils/bcrypt';
 import { UserRegistrationDto } from 'src/dto/user/user.registration.dto';
 import { NotifyMessage } from 'src/constants/notify-message';
 import { UserResponseDto } from 'src/dto/user/user.response.dto';
 import { UserRequestDto } from 'src/dto/user/user.request.dto';
 
+import { UserEntity } from 'src/entities/user.entity';
 @Injectable()
 export class UserService {
   constructor(
@@ -44,14 +44,28 @@ export class UserService {
     return this.mapToUserResponseDto(user);
   }
 
-  async findOneByUsername(username: string): Promise<UserResponseDto> {
+  async findOneByUsernameAndEmail(data: string): Promise<UserResponseDto> {
     const user = await this.userRepository.findOne({
-      where: [{ username: username }, { email: username }],
+      where: [{ username: data }, { email: data }],
     });
     if (!user) {
       throw new BadRequestException(NotifyMessage.USER_NOT_FOUND);
     }
     return this.mapToUserResponseDto(user);
+  }
+
+  async findByUsername(data: string): Promise<UserResponseDto[]> {
+    try {
+      const user = await this.userRepository.find({
+        where: [{ username: data }],
+      });
+      if (!user) {
+        throw new BadRequestException(NotifyMessage.USER_NOT_FOUND);
+      }
+      return user.map(this.mapToUserResponseDto);
+    } catch (error) {
+      throw error;
+    }
   }
 
   async findOneByUsernameAndGetPassword(username: string): Promise<string> {

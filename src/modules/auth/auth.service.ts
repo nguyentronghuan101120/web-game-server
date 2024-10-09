@@ -30,7 +30,9 @@ export class AuthService {
     const password = await this.userService.findOneByUsernameAndGetPassword(
       data.username,
     );
-    const user = await this.userService.findOneByUsername(data.username);
+    const user = await this.userService.findOneByUsernameAndEmail(
+      data.username,
+    );
     if (!password) {
       throw new UnauthorizedException(HttpMessage.USER_NOT_FOUND);
     }
@@ -58,6 +60,17 @@ export class AuthService {
   }
 
   async login(loginRequestDto: LoginRequestDto): Promise<LoginResponseDto> {
+    try {
+      const userData = await this.handleLogin(loginRequestDto);
+      return userData;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async loginForPostman(
+    loginRequestDto: LoginRequestDto,
+  ): Promise<LoginResponseDto> {
     try {
       const userData = await this.handleLogin(loginRequestDto);
       return userData;

@@ -43,7 +43,7 @@ export class AuthController {
     @Body() loginRequestDto: LoginRequestDto,
   ): Promise<any> {
     try {
-      const data = await this.authService.login(loginRequestDto);
+      const data = await this.authService.loginForPostman(loginRequestDto);
       return new ResponseData<LoginResponseDto>(
         HttpStatus.OK,
         HttpMessage.SIGN_IN_SUCCESS,

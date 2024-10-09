@@ -1,11 +1,11 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-      {
-        "name": "Run debug",
-        "type": "node-terminal",
-        "request": "launch",
-        "command": "npm run start"
-      },
-    ]
-  }
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run debug",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm run start:dev"
+    }
+  ]
+}

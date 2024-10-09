@@ -7,6 +7,7 @@ import {
   Param,
   Body,
   HttpException,
+  Query,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { HttpMessage, HttpStatus } from 'src/global/http.status';
@@ -16,6 +17,7 @@ import { Roles } from 'src/utils/roles.metadata';
 import { ResponseDataWithEncryption } from 'src/global/response.data-with-encryption';
 import { DataEncryption } from 'src/utils/data-encryption';
 import { RequestData } from 'src/global/request.data';
+// import { StringifyOptions } from 'querystring';
 
 @Controller('users')
 export class UserController {
@@ -56,6 +58,30 @@ export class UserController {
         HttpStatus.OK,
         HttpMessage.OK,
         user,
+      );
+    } catch (error) {
+      throw new HttpException(error.message, error.status);
+    }
+  }
+
+  @Get('search')
+  @Roles(Role.Admin)
+  async search(
+    @Query('q') q: string,
+  ): Promise<ResponseDataWithEncryption<UserResponseDto[]>> {
+    try {
+      const users = await this.userService.findByUsername(q); // Assuming this method exists
+      if (!users || users.length === 0) {
+        return new ResponseDataWithEncryption<UserResponseDto[]>(
+          HttpStatus.NOT_FOUND,
+          HttpMessage.NOT_FOUND,
+          null,
+        );
+      }
+      return new ResponseDataWithEncryption<UserResponseDto[]>(
+        HttpStatus.OK,
+        HttpMessage.OK,
+        users,
       );
     } catch (error) {
       throw new HttpException(error.message, error.status);

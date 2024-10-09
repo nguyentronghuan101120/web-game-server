@@ -16,25 +16,25 @@ export class UserEntity {
   @Column({ nullable: true })
   phone: string | null;
 
-  @Column({ nullable: true, unique: true })
+  @Column({ unique: true })
   email: string | null;
 
   @Column({ nullable: true })
   status: string | null;
 
-  @Column({ default: true })
+  @Column({ default: 1, nullable: true })
   activated: number;
 
   @Column({ nullable: true, name: 'remember_token' })
   rememberToken: string | null;
 
-  @Column({ type: 'decimal', default: 0 })
+  @Column({ type: 'decimal', default: 0, nullable: true })
   balance: number;
 
-  @Column({ type: 'decimal', default: 0 })
+  @Column({ type: 'decimal', default: 0, nullable: true })
   luong: number;
 
-  @Column({ type: 'decimal', default: 0 })
+  @Column({ type: 'decimal', default: 0, nullable: true })
   tongnap: number;
 
   @Column({ nullable: true })
@@ -82,48 +82,53 @@ export class UserEntity {
   @Column({ nullable: true })
   tempCode: string | null;
 
-  @Column({ type: 'decimal', default: 0, name: 'efffan' })
+  @Column({ type: 'decimal', default: 0, name: 'efffan', nullable: true })
   effFan: number;
 
-  @Column({ type: 'decimal', default: 0, name: 'effvip' })
+  @Column({ type: 'decimal', default: 0, name: 'effvip', nullable: true })
   effVip: number;
 
-  @Column({ type: 'decimal', default: 0, name: 'efftop' })
+  @Column({ type: 'decimal', default: 0, name: 'efftop', nullable: true })
   effTop: number;
 
-  @Column({ type: 'decimal', default: 0, name: 'effytb' })
+  @Column({ type: 'decimal', default: 0, name: 'effytb', nullable: true })
   effYtb: number;
 
-  @Column({ type: 'decimal', default: 0, name: 'effdg' })
+  @Column({ type: 'decimal', default: 0, name: 'effdg', nullable: true })
   effDg: number;
 
-  @Column({ type: 'decimal', default: 0, name: 'effygt' })
+  @Column({ type: 'decimal', default: 0, name: 'effygt', nullable: true })
   effYgt: number;
 
-  @Column({ type: 'decimal', default: 0, name: 'effydc' })
+  @Column({ type: 'decimal', default: 0, name: 'effydc', nullable: true })
   effYdc: number;
 
-  @Column({ type: 'decimal', default: 0, name: 'effydh' })
+  @Column({ type: 'decimal', default: 0, name: 'effydh', nullable: true })
   effYdh: number;
 
-  @Column({ type: 'decimal', default: 0, name: 'amount_unpaid' })
+  @Column({
+    type: 'decimal',
+    default: 0,
+    name: 'amount_unpaid',
+    nullable: true,
+  })
   amountUnpaid: number;
 
-  @Column({ type: 'decimal', default: 0, name: 'mcs' })
+  @Column({ type: 'decimal', default: 0, name: 'mcs', nullable: true })
   mcs: number;
 
-  @Column({ type: 'decimal', default: 0, name: 'vip' })
+  @Column({ type: 'decimal', default: 0, name: 'vip', nullable: true })
   vip: number;
 
-  @Column({ type: 'decimal', default: 0, name: 'vnd' })
+  @Column({ type: 'decimal', default: 0, name: 'vnd', nullable: true })
   vnd: number;
 
-  @Column({ type: 'decimal', default: 0, name: 'mocvip' })
+  @Column({ type: 'decimal', default: 0, name: 'mocvip', nullable: true })
   mocVip: number;
 
-  @Column({ type: 'decimal', default: 0, name: 'nhanmocnap' })
+  @Column({ type: 'decimal', default: 0, name: 'nhanmocnap', nullable: true })
   nhanMocNap: number;
 
-  @Column({ type: 'decimal', default: 0, name: 'rewardtop' })
+  @Column({ type: 'decimal', default: 0, name: 'rewardtop', nullable: true })
   rewardTop: number;
 }
