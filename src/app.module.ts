@@ -6,6 +6,8 @@ import { ConfigModule } from '@nestjs/config';
 import { UserEntity } from './entities/user.entity';
 import { AuthModule } from './modules/auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
+import { APP_FILTER } from '@nestjs/core';
+import { AllExceptionFilter } from './utils/all-exception.filter';
 
 @Module({
   imports: [
@@ -32,7 +34,12 @@ import { JwtModule } from '@nestjs/jwt';
     AuthModule,
   ],
   controllers: [AppController],
-  providers: [],
+  providers: [
+    {
+      provide: APP_FILTER,
+      useClass: AllExceptionFilter,
+    },
+  ],
 })
 export class AppModule {
   constructor() {

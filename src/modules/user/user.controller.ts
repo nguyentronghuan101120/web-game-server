@@ -6,7 +6,6 @@ import {
   Delete,
   Param,
   Body,
-  HttpException,
   Query,
 } from '@nestjs/common';
 import { UserService } from './user.service';
@@ -26,18 +25,14 @@ export class UserController {
   @Get()
   @Roles(Role.Admin)
   async findAll(): Promise<ResponseDataWithEncryption<UserResponseDto[]>> {
-    try {
-      const users = (await this.userService.findAll()).sort(
-        (a, b) => b.id - a.id,
-      );
-      return new ResponseDataWithEncryption<UserResponseDto[]>(
-        HttpStatus.OK,
-        HttpMessage.OK,
-        users,
-      );
-    } catch (error) {
-      throw new HttpException(error.message, error.status);
-    }
+    const users = (await this.userService.findAll()).sort(
+      (a, b) => b.id - a.id,
+    );
+    return new ResponseDataWithEncryption<UserResponseDto[]>(
+      HttpStatus.OK,
+      HttpMessage.OK,
+      users,
+    );
   }
 
   @Get(':id')
@@ -45,23 +40,19 @@ export class UserController {
   async findOne(
     @Param('id') id: string,
   ): Promise<ResponseDataWithEncryption<UserResponseDto>> {
-    try {
-      const user = await this.userService.findOne(id);
-      if (!user) {
-        return new ResponseDataWithEncryption<UserResponseDto>(
-          HttpStatus.NOT_FOUND,
-          HttpMessage.NOT_FOUND,
-          null,
-        );
-      }
+    const user = await this.userService.findOne(id);
+    if (!user) {
       return new ResponseDataWithEncryption<UserResponseDto>(
-        HttpStatus.OK,
-        HttpMessage.OK,
-        user,
+        HttpStatus.NOT_FOUND,
+        HttpMessage.NOT_FOUND,
+        null,
       );
-    } catch (error) {
-      throw new HttpException(error.message, error.status);
     }
+    return new ResponseDataWithEncryption<UserResponseDto>(
+      HttpStatus.OK,
+      HttpMessage.OK,
+      user,
+    );
   }
 
   @Get(':q')
@@ -69,23 +60,19 @@ export class UserController {
   async search(
     @Query('q') q: string,
   ): Promise<ResponseDataWithEncryption<UserResponseDto[]>> {
-    try {
-      const users = await this.userService.findByUsernameAndEmail(q);
-      if (!users || users.length === 0) {
-        return new ResponseDataWithEncryption<UserResponseDto[]>(
-          HttpStatus.NOT_FOUND,
-          HttpMessage.NOT_FOUND,
-          null,
-        );
-      }
+    const users = await this.userService.findByUsernameAndEmail(q);
+    if (!users || users.length === 0) {
       return new ResponseDataWithEncryption<UserResponseDto[]>(
-        HttpStatus.OK,
-        HttpMessage.OK,
-        users,
+        HttpStatus.NOT_FOUND,
+        HttpMessage.NOT_FOUND,
+        null,
       );
-    } catch (error) {
-      throw new HttpException(error.message, error.status);
     }
+    return new ResponseDataWithEncryption<UserResponseDto[]>(
+      HttpStatus.OK,
+      HttpMessage.OK,
+      users,
+    );
   }
 
   @Post()
@@ -93,23 +80,13 @@ export class UserController {
   async create(
     @Body() data: RequestData,
   ): Promise<ResponseDataWithEncryption<UserResponseDto>> {
-    try {
-      const userDto = DataEncryption().decrypt(data.data);
-      const user = await this.userService.create(userDto);
-      return new ResponseDataWithEncryption<UserResponseDto>(
-        HttpStatus.CREATED,
-        HttpMessage.CREATED,
-        user,
-      );
-    } catch (error) {
-      if (error.code === 'ER_DUP_ENTRY') {
-        throw new HttpException(
-          HttpMessage.USER_ALREADY_EXISTS,
-          HttpStatus.CONFLICT,
-        );
-      }
-      throw new HttpException(error.message, error.status);
-    }
+    const userDto = DataEncryption().decrypt(data.data);
+    const user = await this.userService.create(userDto);
+    return new ResponseDataWithEncryption<UserResponseDto>(
+      HttpStatus.CREATED,
+      HttpMessage.CREATED,
+      user,
+    );
   }
 
   @Put(':id')
@@ -118,23 +95,13 @@ export class UserController {
     @Param('id') id: string,
     @Body() data: RequestData,
   ): Promise<ResponseDataWithEncryption<UserResponseDto>> {
-    try {
-      const userDto = DataEncryption().decrypt(data.data);
-      const user = await this.userService.update(id, userDto);
-      return new ResponseDataWithEncryption<UserResponseDto>(
-        HttpStatus.OK,
-        HttpMessage.OK,
-        user,
-      );
-    } catch (error) {
-      if (error.code === 'ER_DUP_ENTRY') {
-        throw new HttpException(
-          HttpMessage.USER_ALREADY_EXISTS,
-          HttpStatus.CONFLICT,
-        );
-      }
-      throw new HttpException(error.message, error.status);
-    }
+    const userDto = DataEncryption().decrypt(data.data);
+    const user = await this.userService.update(id, userDto);
+    return new ResponseDataWithEncryption<UserResponseDto>(
+      HttpStatus.OK,
+      HttpMessage.OK,
+      user,
+    );
   }
 
   @Delete(':id')
@@ -142,15 +109,11 @@ export class UserController {
   async delete(
     @Param('id') id: string,
   ): Promise<ResponseDataWithEncryption<string>> {
-    try {
-      await this.userService.delete(id);
-      return new ResponseDataWithEncryption<string>(
-        HttpStatus.OK,
-        HttpMessage.OK,
-        null,
-      );
-    } catch (error) {
-      throw new HttpException(error.message, error.status);
-    }
+    await this.userService.delete(id);
+    return new ResponseDataWithEncryption<string>(
+      HttpStatus.OK,
+      HttpMessage.OK,
+      null,
+    );
   }
 }
