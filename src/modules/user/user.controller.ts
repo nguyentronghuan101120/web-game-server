@@ -64,13 +64,13 @@ export class UserController {
     }
   }
 
-  @Get('search')
+  @Get(':q')
   @Roles(Role.Admin)
   async search(
     @Query('q') q: string,
   ): Promise<ResponseDataWithEncryption<UserResponseDto[]>> {
     try {
-      const users = await this.userService.findByUsername(q); // Assuming this method exists
+      const users = await this.userService.findByUsernameAndEmail(q);
       if (!users || users.length === 0) {
         return new ResponseDataWithEncryption<UserResponseDto[]>(
           HttpStatus.NOT_FOUND,

@@ -54,10 +54,10 @@ export class UserService {
     return this.mapToUserResponseDto(user);
   }
 
-  async findByUsername(data: string): Promise<UserResponseDto[]> {
+  async findByUsernameAndEmail(data: string): Promise<UserResponseDto[]> {
     try {
       const user = await this.userRepository.find({
-        where: [{ username: data }],
+        where: [{ username: data }, { email: data }],
       });
       if (!user) {
         throw new BadRequestException(NotifyMessage.USER_NOT_FOUND);
