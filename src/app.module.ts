@@ -1,13 +1,13 @@
 import { Logger, Module } from '@nestjs/common';
-import { AppController } from './app.controller';
 import { UserModule } from './modules/user/user.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { UserEntity } from './entities/user.entity';
 import { AuthModule } from './modules/auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
-import { APP_FILTER } from '@nestjs/core';
+import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { AllExceptionFilter } from './utils/all-exception.filter';
+import { EncryptionInterceptor } from './utils/encryption.interceptor';
 
 @Module({
   imports: [
@@ -33,11 +33,14 @@ import { AllExceptionFilter } from './utils/all-exception.filter';
     UserModule,
     AuthModule,
   ],
-  controllers: [AppController],
   providers: [
     {
       provide: APP_FILTER,
       useClass: AllExceptionFilter,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: EncryptionInterceptor,
     },
   ],
 })

@@ -3,9 +3,9 @@ import { HttpMessage, HttpStatus } from 'src/global/http.status';
 import { AuthService } from './auth.service';
 import { LoginResponseDto } from 'src/dto/auth/login.response.dto';
 import { Public } from 'src/utils/public-metadata';
-import { ResponseDataWithEncryption } from 'src/global/response.data-with-encryption';
-import { RequestData } from 'src/global/request.data';
-import { DataEncryption } from 'src/utils/data-encryption';
+import { LoginRequestDto } from 'src/dto/auth/login.request.dto';
+import { ResponseData } from 'src/global/response-data';
+import { UserRegistrationDto } from 'src/dto/user/user.registration.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -14,12 +14,11 @@ export class AuthController {
   @Post('login')
   @Public()
   @HttpCode(HttpStatus.OK)
-  async login(@Body() data: RequestData): Promise<any> {
-    const loginRequestDto = DataEncryption().decrypt(data.data);
+  async login(@Body() loginRequestDto: LoginRequestDto): Promise<any> {
     const response = await this.authService.login(loginRequestDto);
-    return new ResponseDataWithEncryption<LoginResponseDto>(
+    return new ResponseData<LoginResponseDto>(
       HttpStatus.OK,
-      HttpMessage.SIGN_UP_SUCCESS,
+      HttpMessage.SIGN_IN_SUCCESS,
       response,
     );
   }
@@ -27,11 +26,10 @@ export class AuthController {
   @Post('/register')
   @Public()
   async register(
-    @Body() data: RequestData,
-  ): Promise<ResponseDataWithEncryption<LoginResponseDto>> {
-    const dataDecrypted = DataEncryption().decrypt(data.data);
-    const response = await this.authService.register(dataDecrypted);
-    return new ResponseDataWithEncryption<LoginResponseDto>(
+    @Body() data: UserRegistrationDto,
+  ): Promise<ResponseData<LoginResponseDto>> {
+    const response = await this.authService.register(data);
+    return new ResponseData<LoginResponseDto>(
       HttpStatus.OK,
       HttpMessage.SIGN_UP_SUCCESS,
       response,

@@ -13,10 +13,8 @@ import { HttpMessage, HttpStatus } from 'src/global/http.status';
 import { UserResponseDto } from 'src/dto/user/user.response.dto';
 import { Role } from 'src/global/role.type';
 import { Roles } from 'src/utils/roles.metadata';
-import { ResponseDataWithEncryption } from 'src/global/response.data-with-encryption';
-import { DataEncryption } from 'src/utils/data-encryption';
-import { RequestData } from 'src/global/request.data';
-// import { StringifyOptions } from 'querystring';
+import { ResponseData } from 'src/global/response-data';
+import { UserRequestDto } from 'src/dto/user/user.request.dto';
 
 @Controller('users')
 export class UserController {
@@ -24,11 +22,11 @@ export class UserController {
 
   @Get()
   @Roles(Role.Admin)
-  async findAll(): Promise<ResponseDataWithEncryption<UserResponseDto[]>> {
+  async findAll(): Promise<ResponseData<UserResponseDto[]>> {
     const users = (await this.userService.findAll()).sort(
       (a, b) => b.id - a.id,
     );
-    return new ResponseDataWithEncryption<UserResponseDto[]>(
+    return new ResponseData<UserResponseDto[]>(
       HttpStatus.OK,
       HttpMessage.OK,
       users,
@@ -39,16 +37,16 @@ export class UserController {
   @Roles(Role.Admin)
   async findOne(
     @Param('id') id: string,
-  ): Promise<ResponseDataWithEncryption<UserResponseDto>> {
+  ): Promise<ResponseData<UserResponseDto>> {
     const user = await this.userService.findOne(id);
     if (!user) {
-      return new ResponseDataWithEncryption<UserResponseDto>(
+      return new ResponseData<UserResponseDto>(
         HttpStatus.NOT_FOUND,
         HttpMessage.NOT_FOUND,
         null,
       );
     }
-    return new ResponseDataWithEncryption<UserResponseDto>(
+    return new ResponseData<UserResponseDto>(
       HttpStatus.OK,
       HttpMessage.OK,
       user,
@@ -59,16 +57,16 @@ export class UserController {
   @Roles(Role.Admin)
   async search(
     @Query('q') q: string,
-  ): Promise<ResponseDataWithEncryption<UserResponseDto[]>> {
+  ): Promise<ResponseData<UserResponseDto[]>> {
     const users = await this.userService.findByUsernameAndEmail(q);
     if (!users || users.length === 0) {
-      return new ResponseDataWithEncryption<UserResponseDto[]>(
+      return new ResponseData<UserResponseDto[]>(
         HttpStatus.NOT_FOUND,
         HttpMessage.NOT_FOUND,
         null,
       );
     }
-    return new ResponseDataWithEncryption<UserResponseDto[]>(
+    return new ResponseData<UserResponseDto[]>(
       HttpStatus.OK,
       HttpMessage.OK,
       users,
@@ -78,11 +76,10 @@ export class UserController {
   @Post()
   @Roles(Role.Admin)
   async create(
-    @Body() data: RequestData,
-  ): Promise<ResponseDataWithEncryption<UserResponseDto>> {
-    const userDto = DataEncryption().decrypt(data.data);
-    const user = await this.userService.create(userDto);
-    return new ResponseDataWithEncryption<UserResponseDto>(
+    @Body() data: UserRequestDto,
+  ): Promise<ResponseData<UserResponseDto>> {
+    const user = await this.userService.create(data);
+    return new ResponseData<UserResponseDto>(
       HttpStatus.CREATED,
       HttpMessage.CREATED,
       user,
@@ -93,11 +90,10 @@ export class UserController {
   @Roles(Role.Admin)
   async update(
     @Param('id') id: string,
-    @Body() data: RequestData,
-  ): Promise<ResponseDataWithEncryption<UserResponseDto>> {
-    const userDto = DataEncryption().decrypt(data.data);
-    const user = await this.userService.update(id, userDto);
-    return new ResponseDataWithEncryption<UserResponseDto>(
+    @Body() data: UserRequestDto,
+  ): Promise<ResponseData<UserResponseDto>> {
+    const user = await this.userService.update(id, data);
+    return new ResponseData<UserResponseDto>(
       HttpStatus.OK,
       HttpMessage.OK,
       user,
@@ -106,14 +102,8 @@ export class UserController {
 
   @Delete(':id')
   @Roles(Role.Admin)
-  async delete(
-    @Param('id') id: string,
-  ): Promise<ResponseDataWithEncryption<string>> {
+  async delete(@Param('id') id: string): Promise<ResponseData<string>> {
     await this.userService.delete(id);
-    return new ResponseDataWithEncryption<string>(
-      HttpStatus.OK,
-      HttpMessage.OK,
-      null,
-    );
+    return new ResponseData<string>(HttpStatus.OK, HttpMessage.OK, null);
   }
 }
