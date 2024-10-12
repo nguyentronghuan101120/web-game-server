@@ -4,8 +4,8 @@ import { AuthService } from './auth.service';
 import { LoginResponseDto } from 'src/dto/auth/login.response.dto';
 import { Public } from 'src/utils/public-metadata';
 import { LoginRequestDto } from 'src/dto/auth/login.request.dto';
-import { ResponseData } from 'src/global/response-data';
 import { UserRegistrationDto } from 'src/dto/user/user.registration.dto';
+import { ResponseData } from 'src/global/response.data';
 
 @Controller('auth')
 export class AuthController {

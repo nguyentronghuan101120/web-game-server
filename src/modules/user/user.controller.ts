@@ -13,8 +13,8 @@ import { HttpMessage, HttpStatus } from 'src/global/http.status';
 import { UserResponseDto } from 'src/dto/user/user.response.dto';
 import { Role } from 'src/global/role.type';
 import { Roles } from 'src/utils/roles.metadata';
-import { ResponseData } from 'src/global/response-data';
 import { UserRequestDto } from 'src/dto/user/user.request.dto';
+import { ResponseData } from 'src/global/response.data';
 
 @Controller('users')
 export class UserController {
@@ -22,10 +22,32 @@ export class UserController {
 
   @Get()
   @Roles(Role.Admin)
-  async findAll(): Promise<ResponseData<UserResponseDto[]>> {
-    const users = (await this.userService.findAll()).sort(
-      (a, b) => b.id - a.id,
+  async findAll(
+    @Query('page') page: number,
+    @Query('limit') limit: number,
+  ): Promise<ResponseData<UserResponseDto[]>> {
+    const { users, pagination } = await this.userService.findAll(page, limit);
+    return new ResponseData<UserResponseDto[]>(
+      HttpStatus.OK,
+      HttpMessage.OK,
+      users,
+      pagination,
     );
+  }
+
+  @Get('search')
+  @Roles(Role.Admin)
+  async search(
+    @Query('q') q: string,
+  ): Promise<ResponseData<UserResponseDto[]>> {
+    const users = await this.userService.findManyByUsernameAndEmail(q);
+    if (!users || users.length === 0) {
+      return new ResponseData<UserResponseDto[]>(
+        HttpStatus.NOT_FOUND,
+        HttpMessage.NOT_FOUND,
+        null,
+      );
+    }
     return new ResponseData<UserResponseDto[]>(
       HttpStatus.OK,
       HttpMessage.OK,
@@ -38,7 +60,7 @@ export class UserController {
   async findOne(
     @Param('id') id: string,
   ): Promise<ResponseData<UserResponseDto>> {
-    const user = await this.userService.findOne(id);
+    const user = await this.userService.findOneById(id);
     if (!user) {
       return new ResponseData<UserResponseDto>(
         HttpStatus.NOT_FOUND,
@@ -50,26 +72,6 @@ export class UserController {
       HttpStatus.OK,
       HttpMessage.OK,
       user,
-    );
-  }
-
-  @Get(':q')
-  @Roles(Role.Admin)
-  async search(
-    @Query('q') q: string,
-  ): Promise<ResponseData<UserResponseDto[]>> {
-    const users = await this.userService.findByUsernameAndEmail(q);
-    if (!users || users.length === 0) {
-      return new ResponseData<UserResponseDto[]>(
-        HttpStatus.NOT_FOUND,
-        HttpMessage.NOT_FOUND,
-        null,
-      );
-    }
-    return new ResponseData<UserResponseDto[]>(
-      HttpStatus.OK,
-      HttpMessage.OK,
-      users,
     );
   }
 

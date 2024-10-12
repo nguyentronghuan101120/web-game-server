@@ -16,6 +16,10 @@ export class EncryptionInterceptor implements NestInterceptor {
   ): Promise<Observable<any>> {
     const request = context.switchToHttp().getRequest();
 
+    if (request.query['key'] === process.env.SECRET_KEY) {
+      return next.handle();
+    }
+
     if (request.body.data) {
       const decryptedData = DataEncryption().decrypt(request.body.data);
       request.body = decryptedData;
@@ -32,6 +36,10 @@ export class EncryptionInterceptor implements NestInterceptor {
           return response;
         }),
       )
-      .pipe(tap(() => console.log(`After... ${Date.now() - now}ms`)));
+      .pipe(
+        tap(() =>
+          console.log(`After... ${Date.now() - now}ms - URL: ${request.url}`),
+        ),
+      );
   }
 }

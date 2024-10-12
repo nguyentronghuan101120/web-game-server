@@ -7,6 +7,7 @@ import { LoginRequestDto } from 'src/dto/auth/login.request.dto';
 import { UserRegistrationDto } from 'src/dto/user/user.registration.dto';
 import { HttpMessage } from 'src/global/http.status';
 import { JwtPayload } from 'src/utils/payload';
+import { UserResponseDto } from 'src/dto/user/user.response.dto';
 
 @Injectable()
 export class AuthService {
@@ -18,7 +19,7 @@ export class AuthService {
   private async handleLogin(data: LoginRequestDto): Promise<{
     accessToken: string;
     refreshToken: string;
-    user: any;
+    user: UserResponseDto;
     tokenExpiry: number;
   }> {
     // Ensure that either username or email is provided
@@ -27,16 +28,13 @@ export class AuthService {
     }
     // Use username if available, otherwise use email
     data.username = (data.username || data.email).toLowerCase();
-    const password = await this.userService.findOneByUsernameAndGetPassword(
+    const user = await this.userService.findOneByUsernameAndEmailForLogin(
       data.username,
     );
-    const user = await this.userService.findOneByUsernameAndEmail(
-      data.username,
-    );
-    if (!password) {
+    if (!user) {
       throw new UnauthorizedException(HttpMessage.USER_NOT_FOUND);
     }
-    const isPasswordValid = await comparePassword(data.password, password);
+    const isPasswordValid = await comparePassword(data.password, user.password);
     if (!isPasswordValid) {
       throw new UnauthorizedException(HttpMessage.PASSWORD_INCORRECT);
     }
@@ -56,21 +54,22 @@ export class AuthService {
     });
     const tokenExpiry = parseInt(process.env.JWT_EXPIRES_IN);
 
-    return { accessToken, refreshToken, user, tokenExpiry };
+    return {
+      accessToken,
+      refreshToken,
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        lastLoginWebAt: user.lastLoginWebAt,
+        activated: user.activated,
+      },
+      tokenExpiry,
+    };
   }
 
   async login(loginRequestDto: LoginRequestDto): Promise<LoginResponseDto> {
-    try {
-      const userData = await this.handleLogin(loginRequestDto);
-      return userData;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  async loginForPostman(
-    loginRequestDto: LoginRequestDto,
-  ): Promise<LoginResponseDto> {
     try {
       const userData = await this.handleLogin(loginRequestDto);
       return userData;

@@ -13,6 +13,7 @@ import { UserResponseDto } from 'src/dto/user/user.response.dto';
 import { UserRequestDto } from 'src/dto/user/user.request.dto';
 
 import { UserEntity } from 'src/entities/user.entity';
+import { PaginationAndTotal } from 'src/global/pagination';
 @Injectable()
 export class UserService {
   constructor(
@@ -31,12 +32,26 @@ export class UserService {
     };
   }
 
-  async findAll(): Promise<UserResponseDto[]> {
-    const users = await this.userRepository.find();
-    return users.map(this.mapToUserResponseDto);
+  // Fetch all users with pagination
+  async findAll(
+    page: number,
+    limit: number,
+  ): Promise<{
+    users: UserResponseDto[];
+    pagination: PaginationAndTotal;
+  }> {
+    const users = await this.userRepository.find({
+      skip: (page - 1) * limit, // Skip the records for the current page
+      take: limit, // Limit the number of records returned
+    });
+    const total = await this.userRepository.count();
+    return {
+      users: users.map(this.mapToUserResponseDto),
+      pagination: { page, limit, total },
+    };
   }
 
-  async findOne(id: string): Promise<UserResponseDto> {
+  async findOneById(id: string): Promise<UserResponseDto> {
     const user = await this.userRepository.findOneBy({ id: parseInt(id) });
     if (!user) {
       throw new BadRequestException(NotifyMessage.USER_NOT_FOUND);
@@ -54,7 +69,19 @@ export class UserService {
     return this.mapToUserResponseDto(user);
   }
 
-  async findByUsernameAndEmail(data: string): Promise<UserResponseDto[]> {
+  async findOneByUsernameAndEmailForLogin(
+    data: string,
+  ): Promise<UserResponseDto> {
+    const user = await this.userRepository.findOne({
+      where: [{ username: data }, { email: data }],
+    });
+    if (!user) {
+      throw new BadRequestException(NotifyMessage.USER_NOT_FOUND);
+    }
+    return user;
+  }
+
+  async findManyByUsernameAndEmail(data: string): Promise<UserResponseDto[]> {
     try {
       const user = await this.userRepository.find({
         where: [{ username: data }, { email: data }],
@@ -66,24 +93,6 @@ export class UserService {
     } catch (error) {
       throw error;
     }
-  }
-
-  async findOneByUsernameAndGetPassword(username: string): Promise<string> {
-    const user = await this.userRepository.findOne({
-      where: [{ username: username }, { email: username }],
-    });
-    if (!user) {
-      throw new BadRequestException(NotifyMessage.USER_NOT_FOUND);
-    }
-    return user.password;
-  }
-
-  async findOneByEmail(email: string): Promise<UserResponseDto> {
-    const user = await this.userRepository.findOneBy({ email: email });
-    if (!user) {
-      throw new BadRequestException(NotifyMessage.USER_NOT_FOUND);
-    }
-    return this.mapToUserResponseDto(user);
   }
 
   async register(userDto: UserRegistrationDto): Promise<void> {
@@ -115,7 +124,7 @@ export class UserService {
         userDto.password = encodePassword(userDto.password);
       }
       await this.userRepository.update(id, userDto);
-      return this.findOne(id);
+      return this.findOneById(id);
     } catch (error) {
       throw error;
     }
