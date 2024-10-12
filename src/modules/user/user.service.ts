@@ -5,7 +5,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { encodePassword } from 'src/utils/bcrypt';
 import { UserRegistrationDto } from 'src/dto/user/user.registration.dto';
 import { NotifyMessage } from 'src/constants/notify-message';
@@ -81,15 +81,30 @@ export class UserService {
     return user;
   }
 
-  async findManyByUsernameAndEmail(data: string): Promise<UserResponseDto[]> {
+  async findManyByUsernameAndEmail(
+    data: string,
+    page: number,
+    limit: number,
+  ): Promise<{
+    users: UserResponseDto[];
+    pagination: PaginationAndTotal;
+  }> {
     try {
-      const user = await this.userRepository.find({
-        where: [{ username: data }, { email: data }],
+      const users = await this.userRepository.find({
+        where: [{ username: Like(`%${data}%`) }, { email: Like(`%${data}%`) }],
+        skip: (page - 1) * limit,
+        take: limit,
       });
-      if (!user) {
+      const total = await this.userRepository.count({
+        where: [{ username: Like(`%${data}%`) }, { email: Like(`%${data}%`) }],
+      });
+      if (!users || users.length === 0) {
         throw new BadRequestException(NotifyMessage.USER_NOT_FOUND);
       }
-      return user.map(this.mapToUserResponseDto);
+      return {
+        users: users.map(this.mapToUserResponseDto),
+        pagination: { page, limit, total },
+      };
     } catch (error) {
       throw error;
     }

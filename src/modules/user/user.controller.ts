@@ -39,8 +39,11 @@ export class UserController {
   @Roles(Role.Admin)
   async search(
     @Query('q') q: string,
+    @Query('page') page: number,
+    @Query('limit') limit: number,
   ): Promise<ResponseData<UserResponseDto[]>> {
-    const users = await this.userService.findManyByUsernameAndEmail(q);
+    const { users, pagination } =
+      await this.userService.findManyByUsernameAndEmail(q, page, limit);
     if (!users || users.length === 0) {
       return new ResponseData<UserResponseDto[]>(
         HttpStatus.NOT_FOUND,
@@ -52,6 +55,7 @@ export class UserController {
       HttpStatus.OK,
       HttpMessage.OK,
       users,
+      pagination,
     );
   }
 
