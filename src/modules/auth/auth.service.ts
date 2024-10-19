@@ -20,7 +20,6 @@ export class AuthService {
     accessToken: string;
     refreshToken: string;
     user: UserResponseDto;
-    tokenExpiry: number;
   }> {
     // Ensure that either username or email is provided
     if (!data.username && !data.email) {
@@ -48,11 +47,14 @@ export class AuthService {
       role: user.role,
     };
 
-    const accessToken = await this.jwtService.signAsync(payload);
+    const accessToken = await this.jwtService.signAsync(payload, {
+      expiresIn: process.env.JWT_EXPIRES_IN,
+      secret: process.env.JWT_SECRET,
+    });
     const refreshToken = await this.jwtService.signAsync(payload, {
       expiresIn: process.env.JWT_REFRESH_EXPIRES_IN,
+      secret: process.env.JWT_REFRESH_SECRET,
     });
-    const tokenExpiry = parseInt(process.env.JWT_EXPIRES_IN);
 
     return {
       accessToken,
@@ -65,7 +67,6 @@ export class AuthService {
         lastLoginWebAt: user.lastLoginWebAt,
         activated: user.activated,
       },
-      tokenExpiry,
     };
   }
 
@@ -83,13 +84,18 @@ export class AuthService {
     return;
   }
 
-  // async refreshToken(refreshToken: string): Promise<LoginResponseDto> {
-  //   const payload = await this.jwtService.verifyAsync(refreshToken);
-  //   const accessToken = await this.jwtService.signAsync(payload);
-  //   return new LoginResponseDto(accessToken, refreshToken);
-  // }
+  async refreshToken(refreshToken: string): Promise<LoginResponseDto> {
+    const payload = await this.jwtService.verifyAsync(refreshToken, {
+      secret: process.env.JWT_REFRESH_SECRET,
+    });
 
-  // async logout(userId: string): Promise<void> {
-  //   await this.userService.update(userId, { refreshToken: null });
-  // }
+    delete payload.exp;
+    delete payload.iat;
+
+    const accessToken = await this.jwtService.signAsync(payload, {
+      expiresIn: process.env.JWT_EXPIRES_IN,
+      secret: process.env.JWT_SECRET,
+    });
+    return new LoginResponseDto(accessToken, refreshToken, null);
+  }
 }

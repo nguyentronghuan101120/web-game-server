@@ -23,7 +23,7 @@ export class AuthController {
     );
   }
 
-  @Post('/register')
+  @Post('register')
   @Public()
   async register(
     @Body() data: UserRegistrationDto,
@@ -32,6 +32,17 @@ export class AuthController {
     return new ResponseData<LoginResponseDto>(
       HttpStatus.OK,
       HttpMessage.SIGN_UP_SUCCESS,
+      response,
+    );
+  }
+
+  @Post('refresh-token')
+  @HttpCode(HttpStatus.OK)
+  async refreshToken(@Body() data: any) {
+    const response = await this.authService.refreshToken(data['data']);
+    return new ResponseData<LoginResponseDto>(
+      HttpStatus.OK,
+      HttpMessage.OK,
       response,
     );
   }

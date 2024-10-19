@@ -29,6 +29,13 @@ import { EncryptionInterceptor } from './utils/encryption.interceptor';
         expiresIn: process.env.JWT_EXPIRES_IN,
       },
     }),
+    JwtModule.register({
+      global: true,
+      secret: process.env.JWT_REFRESH_SECRET,
+      signOptions: {
+        expiresIn: process.env.JWT_REFRESH_EXPIRES_IN,
+      },
+    }),
     TypeOrmModule.forFeature([UserEntity]),
     UserModule,
     AuthModule,
