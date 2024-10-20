@@ -2,7 +2,7 @@ import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity({ name: 'users' })
 export class UserEntity {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ type: 'bigint', unsigned: true })
   id: number;
 
   @Column({
@@ -19,8 +19,8 @@ export class UserEntity {
   @Column({ unique: true })
   email: string | null;
 
-  @Column({ nullable: true })
-  status: string | null;
+  @Column({ default: 1 })
+  status: number;
 
   @Column({ default: 1, nullable: true })
   activated: number;
@@ -31,14 +31,14 @@ export class UserEntity {
   @Column({ type: 'decimal', default: 0, nullable: true })
   balance: number;
 
-  @Column({ type: 'decimal', default: 0, nullable: true })
+  @Column({ type: 'int', width: 11, default: 0 })
   luong: number;
 
   @Column({ type: 'decimal', default: 0, nullable: true })
   tongnap: number;
 
-  @Column({ nullable: true })
-  online: boolean;
+  @Column({ type: 'tinyint', width: 1, default: 0 })
+  online: number;
 
   @Column({ default: 0, nullable: true })
   role: number;
@@ -61,8 +61,13 @@ export class UserEntity {
   @Column({ type: 'simple-array', name: 'ip_address', nullable: true })
   ipAddress: string[];
 
-  @Column({ type: 'simple-array', name: 'level_reward', nullable: true })
-  levelReward: number[];
+  @Column({
+    type: 'varchar',
+    length: 30,
+    name: 'level_reward',
+    default: '[0,0,0,0,0]',
+  })
+  levelReward: string; // Changed from number[] to string
 
   @Column({ nullable: true })
   note: string | null;
@@ -82,28 +87,28 @@ export class UserEntity {
   @Column({ nullable: true })
   tempCode: string | null;
 
-  @Column({ type: 'decimal', default: 0, name: 'efffan', nullable: true })
+  @Column({ type: 'int', width: 11, default: 0, name: 'efffan' })
   effFan: number;
 
-  @Column({ type: 'decimal', default: 0, name: 'effvip', nullable: true })
+  @Column({ type: 'int', width: 11, default: 0, name: 'effvip' })
   effVip: number;
 
-  @Column({ type: 'decimal', default: 0, name: 'efftop', nullable: true })
+  @Column({ type: 'int', width: 11, default: 0, name: 'efftop' })
   effTop: number;
 
-  @Column({ type: 'decimal', default: 0, name: 'effytb', nullable: true })
+  @Column({ type: 'int', width: 11, default: 0, name: 'effytb' })
   effYtb: number;
 
-  @Column({ type: 'decimal', default: 0, name: 'effdg', nullable: true })
+  @Column({ type: 'int', width: 11, default: 0, name: 'effdg' })
   effDg: number;
 
-  @Column({ type: 'decimal', default: 0, name: 'effygt', nullable: true })
+  @Column({ type: 'int', width: 11, default: 0, name: 'effygt' })
   effYgt: number;
 
-  @Column({ type: 'decimal', default: 0, name: 'effydc', nullable: true })
+  @Column({ type: 'int', width: 11, default: 0, name: 'effydc' })
   effYdc: number;
 
-  @Column({ type: 'decimal', default: 0, name: 'effydh', nullable: true })
+  @Column({ type: 'int', width: 11, default: 0, name: 'effydh' })
   effYdh: number;
 
   @Column({
@@ -126,7 +131,12 @@ export class UserEntity {
   @Column({ type: 'decimal', default: 0, name: 'mocvip', nullable: true })
   mocVip: number;
 
-  @Column({ type: 'decimal', default: 0, name: 'nhanmocnap', nullable: true })
+  @Column({
+    type: 'int',
+    width: 11,
+    default: 0,
+    name: 'nhanmocnap',
+  })
   nhanMocNap: number;
 
   @Column({ type: 'decimal', default: 0, name: 'rewardtop', nullable: true })
